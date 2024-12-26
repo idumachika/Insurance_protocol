@@ -197,5 +197,18 @@
     )
 )
 
+;; Read-only functions
+(define-read-only (get-policy (user principal))
+    (map-get? policies user)
+)
+
+(define-read-only (get-claim (claim-id uint))
+    (map-get? claims claim-id)
+)
+
+(define-read-only (get-pool-stats)
+    (map-get? pool-stats true)
+)
+
 
 
