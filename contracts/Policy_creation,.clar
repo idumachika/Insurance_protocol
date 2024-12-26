@@ -104,4 +104,33 @@
     )
 )
 
+;; Public Functions
+(define-public (create-policy (coverage-amount uint) (duration uint))
+    (let
+        (
+            (sender tx-sender)
+            (risk-data (default-to 
+                {score: u500, last-updated: u0, total-claims: u0}
+                (map-get? risk-scores sender)))
+            (premium-amount (calculate-premium coverage-amount (get score risk-data)))
+        )
+        (asserts! (and 
+            (>= coverage-amount MIN-COVERAGE-AMOUNT)
+            (<= coverage-amount MAX-COVERAGE-AMOUNT)) 
+            ERR-INVALID-AMOUNT)
+        (try! (stx-transfer? premium-amount sender (as-contract tx-sender)))
+        (ok (map-set policies
+            sender
+            {
+                coverage-amount: coverage-amount,
+                premium-amount: premium-amount,
+                risk-score: (get score risk-data),
+                start-block: block-height,
+                end-block: (+ block-height duration),
+                claims-filed: u0,
+                active: true
+            }))
+    )
+)
+
 
