@@ -134,3 +134,29 @@
 )
 
 
+(define-public (file-claim (amount uint) (evidence-hash (buff 32)))
+    (let
+        (
+            (sender tx-sender)
+            (policy (unwrap! (map-get? policies sender) ERR-POLICY-NOT-FOUND))
+            (claim-id (+ (var-get next-claim-id) u1))
+        )
+        (asserts! (get active policy) ERR-POLICY-EXPIRED)
+        (asserts! (>= amount CLAIM-THRESHOLD) ERR-INVALID-AMOUNT)
+        (asserts! (<= amount (get coverage-amount policy)) ERR-INSUFFICIENT-COVERAGE)
+        (var-set next-claim-id claim-id)
+        (ok (map-set claims
+            claim-id
+            {
+                policyholder: sender,
+                amount: amount,
+                evidence-hash: evidence-hash,
+                votes-for: u0,
+                votes-against: u0,
+                status: "PENDING",
+                created-at: block-height
+            }))
+    )
+)
+
+
