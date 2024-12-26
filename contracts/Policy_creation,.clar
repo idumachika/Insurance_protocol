@@ -21,3 +21,51 @@
 (define-constant ERR-INSUFFICIENT-COVERAGE (err u105))
 (define-constant ERR-INVALID-RISK-SCORE (err u106))
 
+
+;; Data Maps
+(define-map policies
+    principal
+    {
+        coverage-amount: uint,
+        premium-amount: uint,
+        risk-score: uint,
+        start-block: uint,
+        end-block: uint,
+        claims-filed: uint,
+        active: bool
+    }
+)
+
+
+(define-map claims
+    uint
+    {
+        policyholder: principal,
+        amount: uint,
+        evidence-hash: (buff 32),
+        votes-for: uint,
+        votes-against: uint,
+        status: (string-ascii 20),
+        created-at: uint
+    }
+)
+
+(define-map risk-scores
+    principal
+    {
+        score: uint,
+        last-updated: uint,
+        total-claims: uint
+    }
+)
+
+(define-map pool-stats
+    bool
+    {
+        total-premiums: uint,
+        total-claims-paid: uint,
+        available-liquidity: uint,
+        total-policies: uint
+    }
+)
+
