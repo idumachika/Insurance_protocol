@@ -160,3 +160,42 @@
 )
 
 
+(define-public (vote-on-claim (claim-id uint) (vote bool))
+    (let
+        (
+            (sender tx-sender)
+            (claim (unwrap! (map-get? claims claim-id) ERR-CLAIM-IN-PROGRESS))
+        )
+        (asserts! (is-eq (get status claim) "PENDING") ERR-UNAUTHORIZED)
+        (if vote
+            (map-set claims claim-id (merge claim {votes-for: (+ (get votes-for claim) u1)}))
+            (map-set claims claim-id (merge claim {votes-against: (+ (get votes-against claim) u1)}))
+        )
+        (ok true)
+    )
+)
+
+(define-public (process-claim (claim-id uint))
+    (let
+        (
+            (claim (unwrap! (map-get? claims claim-id) ERR-CLAIM-IN-PROGRESS))
+            (total-votes (+ (get votes-for claim) (get votes-against claim)))
+        )
+        (asserts! (>= (- block-height (get created-at claim)) VOTING-PERIOD) ERR-UNAUTHORIZED)
+        (if (> (get votes-for claim) (get votes-against claim))
+            (begin
+                (try! (as-contract (stx-transfer? 
+                    (get amount claim)
+                    (as-contract tx-sender)
+                    (get policyholder claim))))
+                (map-set claims claim-id (merge claim {status: "APPROVED"}))
+                (ok true))
+            (begin
+                (map-set claims claim-id (merge claim {status: "REJECTED"}))
+                (ok true))
+        )
+    )
+)
+
+
+
