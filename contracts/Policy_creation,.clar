@@ -69,3 +69,17 @@
     }
 )
 
+;; Private Functions
+(define-private (calculate-premium 
+    (coverage-amount uint) 
+    (risk-score uint))
+    (let
+        (
+            (base-premium (/ (* coverage-amount PREMIUM-BASE-RATE) u10000))
+            (risk-adjusted-premium (/ (* base-premium (+ u1000 (* risk-score RISK-MULTIPLIER))) u1000))
+        )
+        risk-adjusted-premium
+    )
+)
+
+
