@@ -82,4 +82,26 @@
     )
 )
 
+(define-private (update-risk-score (user principal) (claim-amount uint))
+    (let
+        (
+            (current-score (default-to 
+                {score: u500, last-updated: u0, total-claims: u0}
+                (map-get? risk-scores user)))
+            (new-score (+ 
+                (get score current-score)
+                (/ (* claim-amount u100) (get total-claims current-score))))
+        )
+        (map-set risk-scores
+            user
+            (merge current-score {
+                score: new-score,
+                last-updated: block-height,
+                total-claims: (+ u1 (get total-claims current-score))
+            })
+        )
+        new-score
+    )
+)
+
 
